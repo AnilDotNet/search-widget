@@ -1,0 +1,805 @@
+﻿@using Search_Widget.Models
+
+@* <h2>Home</h2> *@
+
+@{
+    ViewData["Title"] = "Office Survey";
+    var userName = ViewData["UserName"] as string;
+    var userEmail = ViewData["userEmailID"] as string;
+}
+
+@{
+    @using System.Text.Json
+@model List<Search_Widget.Models.SearchWidgetModel>
+
+    // <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.2.3/css/dx.light.css">
+
+    // <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    // <script src="https://cdn3.devexpress.com/jslib/23.2.3/js/dx.all.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <html lang="en">
+
+    <body>
+        <div class="top-bar d-flex align-items-center justify-content-between px-3">
+
+            <!-- Logo -->
+            <img src="/images/logo-white.svg" alt="TRC Logo" class="logo" />
+
+            <!-- Profile Section -->
+            <div class="dropdown">
+
+                <div class="d-flex align-items-center text-white"
+                     data-bs-toggle="dropdown"
+                     style="cursor:pointer;">
+
+                    
+
+                    <!-- Initials circle -->
+                    <div class="avatar" id="userAvatar">AS</div>
+                </div>
+
+                <!-- Dropdown Card -->
+                <div class="dropdown-menu dropdown-menu-end p-3 profile-card">
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong>TRC</strong>
+                        <a href="https://login.microsoftonline.com/{09543715-ce7d-46a3-a789-9d6bfbda6e6a}/oauth2/v2.0/logout?post_logout_redirect_uri=https://localhost:5001/"
+                           class="text-danger small">
+                            Logout
+                        </a>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <div class="avatar large" id="userAvatarLarge">AS</div>
+
+                        <div class="ms-3">
+                            <div class="fw-bold">@userName</div>
+                            <div class="text-muted small">@userEmail</div>
+                            
+                            
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <main class="main-container">
+
+
+            <div class="page-title">
+                <span class="main-title">Project Search</span>
+                <span class="sub-title">
+                    (Search for projects by number, client, name, or project manager)
+                </span>
+            </div>
+
+            <div class="project-container1">
+
+                <!-- LEFT SIDE -->
+                <div class="left-panel1">                    
+
+                    <div class="search-container">
+                        <div class="search-box">
+
+                            <!-- Dropdown -->
+                            <select class="search-dropdown" id="search-dropdown">
+                                <option>Search All</option>
+                                <option>Project No</option>
+                                <option>Project Name</option>
+                                <option>Project Mgr</option>
+                                <option>Client Name</option>
+                            </select>
+
+                            <!-- Divider -->
+                            <div class="divider"></div>
+
+                            <!-- Input -->
+                            <input type="text" id="projectSearch" class="search-input" placeholder="Search projects..." />
+
+                            <!-- Clear Icon -->
+                            <span class="clear-btn">&times;</span>
+
+                        </div>
+
+                        <label class="active-filter">
+        <input type="checkbox" id="activeProjectsOnly" checked>
+        Active Projects
+    </label>
+
+                    </div>
+
+                    <div id="loader" style="display:none;">Loading...</div>
+                    <div style="display:flex; gap:20px;">
+                        
+                        <!-- LEFT: Search Results -->
+                        <div id="projectResults" class="project-results" style="width:40%;"></div>
+
+                        <!-- RIGHT: Project Details -->
+                        <div id="projectDetails" style="width:60%; padding:15px;padding-left: 35px;">
+                            
+                        </div>
+
+                    </div>
+
+                </div>
+
+               
+               
+
+            </div>
+        </main>
+    </body>
+    </html>
+
+
+    <script>
+
+        $(".clear-btn").click(function () {
+            $("#projectSearch").val("");
+            $("#projectResults").html("");   // clear results list
+        });
+
+        function getInitials(name) {
+            return name.split(' ')
+                       .map(n => n[0])
+                       .join('')
+                       .substring(0, 2)
+                       .toUpperCase();
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const name = "@userName"; // Razor variable
+
+            const initials = getInitials(name);
+
+            document.getElementById("userAvatar").innerText = initials;
+            document.getElementById("userAvatarLarge").innerText = initials;
+        });
+        function renderResults(data) {
+            let html = "";
+                
+
+            data.forEach(function (item) {
+                html += `
+                    <div class="result-item" data-id="${item.projectId}">
+                        <strong>${item.clientName}</strong><br/>
+                        <span>Project: ${item.projectName}</span>
+                    </div>
+                `;
+            });
+
+            $("#projectResults").html(html);
+        }
+
+                $(document).on("click", ".result-item", function () {
+
+            let projectId = $(this).data("id");
+
+            // highlight selected
+            $(".result-item").removeClass("active");
+            $(this).addClass("active");
+
+            // call API for details
+            loadProjectDetails(projectId);
+        });
+
+                function loadProjectDetails(projectId) {
+
+            $("#projectDetails").html("Loading...");
+
+            $.ajax({
+                url: "/Home/GetProjectDetails",
+                type: "GET",
+                data: { id: projectId },
+                success: function (data) {
+
+                    let html = `
+                        <h3><strong>${data.clientName}</strong></h3>
+
+                            <p>Client Name: <b>${data.clientName}</b></p>
+                                <p>Project Number: <span style="color:purple"><b>${data.projectNumber}</b></span></p>
+                            <p>Project Name: <b>${data.projectName}</b></p>
+                                <p>
+            Status:
+            <span style="color:${data.status === 'A' ? 'green' : 'orange'}">
+                ${data.status === 'A' ? 'Active' : 'Dormant'}
+            </span>
+        </p>
+        <div class="icon-group">
+            <p>
+                Project Manager:
+                <span style="color:purple">${data.projectManager}</span>
+
+                ${data.projectManagerStatus === 'A' ? `
+
+                    <a href="https://teams.microsoft.com/l/chat/0/0?users=${data.projectManagerEmail}" target="_blank">
+                        <i class="bi bi-microsoft-teams action-icon" title="Chat in Teams"></i>
+                    </a>
+
+                    <a href="mailto:${data.projectManagerEmail}">
+                        <i class="bi bi-envelope action-icon" title="Email"></i>
+                    </a>
+
+                    <div class="phone-wrapper">
+                        <i class="bi bi-telephone action-icon"></i>
+
+                        <div class="contact-card">
+                            <div class="contact-name">${data.projectManager}</div>
+
+                            <div class="contact-row">
+                                <i class="bi bi-envelope"></i>
+                                ${data.projectManagerEmail}
+                            </div>
+
+                            <div class="contact-row">
+                                <i class="bi bi-telephone"></i>
+                                ${data.projectManagerPhone || 'N/A'}
+                            </div>
+                        </div>
+                    </div>
+
+                ` : `
+                    <span style="color:red; margin-left:8px;">
+                        No longer active
+                    </span>
+                `}
+            </p>
+        </div>
+        <div class="icon-group2">
+            <p>
+                Office Practice Leader:
+                <span style="color:purple">${data.officePracticeLead}</span>
+
+                ${data.officePracticeLeadStatus === 'A' ? `
+
+                    <a href="https://teams.microsoft.com/l/chat/0/0?users=${data.officePracticeLeadEmail}" target="_blank">
+                        <i class="bi bi-microsoft-teams action-icon" title="Chat in Teams"></i>
+                    </a>
+
+                    <a href="mailto:${data.officePracticeLeadEmail}">
+                        <i class="bi bi-envelope action-icon" title="Email"></i>
+                    </a>
+
+                    <div class="phone-wrapper">
+                        <i class="bi bi-telephone action-icon"></i>
+
+                        <div class="contact-card">
+                            <div class="contact-name">${data.officePracticeLead}</div>
+
+                            <div class="contact-row">
+                                <i class="bi bi-envelope"></i>
+                                ${data.officePracticeLeadEmail}
+                            </div>
+
+                            <div class="contact-row">
+                                <i class="bi bi-telephone"></i>
+                                ${data.officePracticeLeadPhone || 'N/A'}
+                            </div>
+                        </div>
+                    </div>
+
+                ` : `
+                    <span style="color:red; margin-left:8px;">
+                        No longer active
+                    </span>
+                `}
+            </p>
+        </div>
+
+                        <hr/>
+                        <b>Quick Links:</b><br/>                           
+
+                                  
+
+                <div class="link-item">
+            <span class="icon-box"><i class="bi bi-folder"></i></span>
+              <a href="${data.ProjectWise_URL}">ProjectWise</a>
+        </div>
+
+                ${data.Salesforce_URL ? `
+            <div class="link-item">
+                <span class="icon-box">
+                    <i class="bi bi-currency-dollar"></i>
+                </span>
+
+                <a href="${data.Salesforce_URL}" target="_blank">
+                    Salesforce
+                </a>
+            </div>
+        ` : ''}
+
+        <div class="link-item">
+            <span class="icon-box"><i class="bi bi-info"></i></span>
+              <a href="${data.Vision_URL}">Vision</a>
+        </div>
+                    `;
+
+                    $("#projectDetails").html(html);
+                },
+                error: function () {
+                    $("#projectDetails").html("Error loading details");
+                }
+            });
+        }
+
+        $(function () {
+
+            var projects = @Html.Raw(JsonSerializer.Serialize(Model));
+            console.log(projects);
+
+            var list = $("#projectList").dxList({
+                dataSource: projects,
+                displayExpr: "ClientName",
+                height: 500,
+                selectionMode: "single",
+
+                onSelectionChanged: function (e) {
+
+                    var data = e.addedItems[0];
+
+                    if (!data) return;
+
+                    $("#projectDetails1").html(`
+                        <h3>${data.ClientName}</h3>
+
+                        <p><b>Project Number:</b> ${data.ProjectNumber}</p>
+                        <p><b>Project Name:</b> ${data.ProjectName}</p>
+                        <p><b>Status:</b> ${data.Status}</p>
+                        <p><b>Project Manager:</b> ${data.ProjectManager}</p>
+                        <p><b>Office Practice Leader:</b> ${data.PracticeLeader}</p>
+
+                        <h4>Quick Links</h4>
+
+                        <ul>
+                            <li><a href="#">ProjectWise</a></li>
+                            <li><a href="#">Salesforce</a></li>
+                            <li><a href="#">Vision</a></li>
+                        </ul>
+                    `);
+                }
+
+            }).dxList("instance");
+
+
+        //                 $("#searchBox").dxTextBox({
+        //     placeholder: "Search projects...",
+        //     width: 400,
+        //     valueChangeEvent: "keyup",   // triggers on every keystroke
+
+        //     onValueChanged: function (e) {
+
+        //         var searchValue = (e.value || "").toLowerCase();
+
+        //         var filtered = projects.filter(function (item) {
+        //             return item.ClientName.toLowerCase().includes(searchValue);
+        //         });
+
+        //         list.option("dataSource", filtered);
+        //     }
+        // });
+
+                      let timer;
+
+        //$("#projectSearch").on("keyup", function () {
+           // clearTimeout(timer);
+               $("#projectSearch").on("keypress", function (e) {
+
+        if (e.which === 13) {   //Enter key
+
+            e.preventDefault(); // optional (prevents form submit)
+
+            let searchText = $(this).val();
+              let searchType = $("#search-dropdown").val();
+                    let activeProjectsOnly = $("#activeProjectsOnly").is(":checked");
+
+            timer = setTimeout(function () {
+
+                //$("#loader").show();      
+                $("#projectResults").html("");
+                  $("#projectResults").html("   Loading...");
+
+                $.ajax({
+                    url: "/Home/SearchProjects",
+                    type: "GET",
+                      data: { query: searchText, type: searchType,filter:activeProjectsOnly },
+                    success: function (data) {
+
+                        let html = "";
+
+                         data.forEach(function (item) {
+            html += `
+                <div class="result-item" data-id="${item.project}">
+                      <strong style='font-size: 18px;'>${item.client}</strong><br/>
+                          <span>Project Name: <span style="color:#6f42c1;">${item.projectName}</span> </span>
+                </div>
+            `;
+        });
+
+                        $("#projectResults").html(html);
+                    },
+                    error: function () {
+                        $("#projectResults").html("Error loading data");
+                    },
+                    complete: function () {
+                       // $("#loader").hide();   
+                    }
+                });
+
+            }, 400);
+      }  });
+
+        });
+
+                $(document).on("mouseenter", ".phone-wrapper", function () {
+            $(this).find(".contact-card").show();
+        });
+
+        $(document).on("mouseleave", ".phone-wrapper", function () {
+            $(this).find(".contact-card").hide();
+        });
+
+    </script>
+
+    <style>
+
+.active-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+        .icon-group,
+        .icon-group2 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .phone-wrapper:hover .contact-card {
+            display: block;
+        }
+
+        .phone-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom:16px;
+        }
+
+        /* Popup */
+        .contact-card {
+            position: absolute;
+            bottom: 35px; /* show above icon */
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            border: 2px solid #6f42c1;
+            border-radius: 10px;
+            padding: 10px;
+            width: 250px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: none; /* 🔥 key */
+            z-index: 1000;
+        }
+
+        /* Show on hover */
+        .phone-wrapper:hover .contact-card {
+            display: block;
+        }
+
+        /* Arrow */
+        .contact-card::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px;
+            border-style: solid;
+            border-color: #6f42c1 transparent transparent transparent;
+        }
+
+        /* Text */
+        .contact-name {
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-decoration: underline;
+        }
+
+        .contact-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+
+        .left-panel1 {
+            background-color: #f5f6f8;
+        }
+        .action-icon {
+            color: purple;
+            margin-left: 8px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+            .action-icon:hover {
+                opacity: 0.7;
+            }
+        .project-container1{
+            background-color: white;
+            /* padding-bottom: 63px; */
+        }
+        .link-item a:hover {
+            text-decoration: none;
+            opacity: 0.8;
+        }
+        .link-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding-bottom:10px;
+        }
+
+        .icon-box {
+            background-color: #6f42c1; /* purple */
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .link-item a {
+            color: #6f42c1;
+            font-size: 20px;
+            text-decoration: underline;
+        }
+        .top-bar {
+            background-color: #2c3e50;
+            height: 60px;
+        }
+
+        .logo {
+            height: 35px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #e6d3a3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #333;
+        }
+
+            .avatar.large {
+                width: 48px;
+                height: 48px;
+                font-size: 18px;
+            }
+
+        .profile-card {
+            width: 300px;
+            border-radius: 10px;
+        }
+        #projectResults {
+            border: 1px solid #e5e7eb; /* light grey border */
+            border-radius: 8px;
+            /* background: #ffffff; */
+            /* background: #f5f5f5; */
+            background: #f5f6f8;
+			height: 475px; /* fixed height */
+        }
+
+        #projectDetails {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            /* background: #ffffff; */
+            /* background: #f5f5f5; */
+            background: #f5f6f8;
+            height: 475px; /* fixed height */
+        }
+        .project-results {
+            width: 40%;            
+            overflow-y: auto; /* vertical scroll */
+            /* overflow-x: hidden;  no horizontal scroll */
+            border-right: 1px solid #e5e7eb;
+            padding-right: 5px;
+        }
+        .page-title {
+            /* font-family: "Segoe UI", sans-serif; */
+            font-family: 'Arial';
+            margin-bottom: 15px;
+        }
+
+        /* Main title */
+        .main-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937; /* dark grey */
+            font-family: 'Arial';
+        }
+
+        /* Sub text */
+        .sub-title {
+            font-size: 14px;
+            color: #6b7280; /* muted grey */
+            margin-left: 8px;
+        }
+        body {
+            /* font-family: "Segoe UI", sans-serif; */
+            font-family: 'Arial';
+            background: #f5f5f5;
+        }
+
+        /* Container */
+        .search-container {
+            padding: 20px;
+            padding-left:0px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: nowrap;
+        }
+
+        /* Main box */
+        .search-box {
+            display: flex;
+            align-items: center;
+            /* background: #f2f2f5; */
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 10px 15px;
+            width: 635px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Dropdown */
+        .search-dropdown {
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+            color: #333;
+        }
+
+        /* Divider */
+        .divider {
+            width: 1px;
+            height: 24px;
+            background: #ccc;
+            margin: 0 10px;
+        }
+
+        /* Input */
+        .search-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            outline: none;
+            color: #333;
+        }
+
+        /* Clear button */
+        .clear-btn {
+            font-size: 18px;
+            color: #777;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+            .clear-btn:hover {
+                color: #000;
+            }
+
+        .result-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+            .result-item:hover {
+                /* background: #e5e7eb; */
+                background: #f5f5f5;
+            }
+
+            .result-item.active {
+                /* background: #eae6ff; */
+                background: #e5e7eb;
+                border-left: 4px solid #5b3b7a;
+            }
+        #projectResults div:hover {
+            /* background: #f5f5f5; */
+            background: #e5e7eb;
+            cursor: pointer;
+        }
+        body {
+            margin: 0;
+            /* font-family: 'Segoe UI', sans-serif; */
+            font-family: 'Arial';
+            padding-top: 0px !important;
+            padding-left: 50px;
+            padding-right: 50px;
+            background-color: black;
+        }
+        .main-container {
+            padding: 30px;
+            background-color: #f5f6f8;
+            /* background-color: #e0e0e0; */
+            /* background-color: #f5f5f5; */
+            /* background-color: white; */
+            height: 1400px;
+            width:1670px;
+        }
+        .top-bar {
+            /* background-color: #26004d;  Very dark purple */
+            background-color: #2e0055; /* Slightly lighter purple */
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding-left: 20px;
+            width:1670px;
+        }
+        .container {
+            margin: 40px;
+        }
+
+        #projectList {
+            border-right: 1px solid #ddd;
+        }
+
+        #projectDetails {
+            padding-left: 30px;
+        }
+
+        .dx-list-item {
+            padding: 12px;
+        }
+
+        .dx-texteditor-container {
+            height:5%;
+        }
+
+        .project-container {
+            display: flex;
+            gap: 30px;
+        }
+
+        .left-panel {
+            width: 40%;
+        }
+
+        .right-panel {
+            width: 60%;
+            padding: 10px;
+        }
+
+        #projectList {
+            margin-top: 15px;
+        }
+    </style>
+}
