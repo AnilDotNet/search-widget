@@ -125,7 +125,23 @@
                         </div>
 
                     </div>
+                    <div class="pagination-container">
 
+                        <button id="prevBtn">Previous</button>
+
+                        <span id="pageInfo"></span>
+
+                        <button id="nextBtn">Next</button>
+
+                        <select id="pageSize">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+
+                        <span id="totalCountText"></span>
+                    </div>
                 </div>
 
                
@@ -213,7 +229,11 @@
         <div class="icon-group">
             <p>
                 Project Manager:
-                <span style="color:purple">${data.projectManager}</span>
+                        <span style="color:purple">
+            ${data.projectManagerStatus === 'A'
+                ? data.projectManager
+                : data.projectManager.replace(':DNU', '').trim()}
+        </span>
 
                 ${data.projectManagerStatus === 'A' ? `
 
@@ -225,10 +245,10 @@
                         <i class="bi bi-envelope action-icon" title="Email"></i>
                     </a>
 
-                    <div class="phone-wrapper">
+                      <div class="phone-wrapper" style="display:none">
                         <i class="bi bi-telephone action-icon"></i>
 
-                        <div class="contact-card">
+                        <div class="contact-card" >
                             <div class="contact-name">${data.projectManager}</div>
 
                             <div class="contact-row">
@@ -253,7 +273,11 @@
         <div class="icon-group2">
             <p>
                 Office Practice Leader:
-                <span style="color:purple">${data.officePracticeLead}</span>
+                        <span style="color:purple">
+            ${data.officePracticeLeadStatus === 'A'
+                ? data.officePracticeLead
+                : data.officePracticeLead.replace(':DNU', '').trim()}
+        </span>
 
                 ${data.officePracticeLeadStatus === 'A' ? `
 
@@ -265,7 +289,7 @@
                         <i class="bi bi-envelope action-icon" title="Email"></i>
                     </a>
 
-                    <div class="phone-wrapper">
+                      <div class="phone-wrapper" style="display:none">
                         <i class="bi bi-telephone action-icon"></i>
 
                         <div class="contact-card">
@@ -298,7 +322,7 @@
 
                 <div class="link-item">
             <span class="icon-box"><i class="bi bi-folder"></i></span>
-              <a href="${data.ProjectWise_URL}">ProjectWise</a>
+                <a href="${data.ProjectWise_URL}" target="_blank">ProjectWise</a>
         </div>
 
                 ${data.Salesforce_URL ? `
@@ -315,7 +339,7 @@
 
         <div class="link-item">
             <span class="icon-box"><i class="bi bi-info"></i></span>
-              <a href="${data.Vision_URL}">Vision</a>
+                <a href="${data.Vision_URL}" target="_blank">Vision</a>
         </div>
                     `;
 
@@ -387,51 +411,185 @@
 
         //$("#projectSearch").on("keyup", function () {
            // clearTimeout(timer);
-               $("#projectSearch").on("keypress", function (e) {
 
-        if (e.which === 13) {   //Enter key
 
-            e.preventDefault(); // optional (prevents form submit)
 
-            let searchText = $(this).val();
-              let searchType = $("#search-dropdown").val();
-                    let activeProjectsOnly = $("#activeProjectsOnly").is(":checked");
 
-            timer = setTimeout(function () {
+      //          $("#projectSearch").on("keypress", function (e) {
 
-                //$("#loader").show();      
-                $("#projectResults").html("");
-                  $("#projectResults").html("   Loading...");
+      //   if (e.which === 13) {   //Enter key
 
-                $.ajax({
-                    url: "/Home/SearchProjects",
-                    type: "GET",
-                      data: { query: searchText, type: searchType,filter:activeProjectsOnly },
-                    success: function (data) {
+      //       e.preventDefault(); // optional (prevents form submit)
 
-                        let html = "";
+      //       let searchText = $(this).val();
+      //         let searchType = $("#search-dropdown").val();
+      //               let activeProjectsOnly = $("#activeProjectsOnly").is(":checked");
+      //                 let currentPage = 1;
 
-                         data.forEach(function (item) {
-            html += `
-                <div class="result-item" data-id="${item.project}">
-                      <strong style='font-size: 18px;'>${item.client}</strong><br/>
-                          <span>Project Name: <span style="color:#6f42c1;">${item.projectName}</span> </span>
-                </div>
-            `;
+      //       timer = setTimeout(function () {
+
+      //           //$("#loader").show();      
+      //           $("#projectResults").html("");
+      //             $("#projectResults").html("   Loading...");
+
+      //           $.ajax({
+      //               url: "/Home/SearchProjects",
+      //               type: "GET",
+      //                     data: { query: searchText, type: searchType,filter:activeProjectsOnly,page: currentPage,pageSize: $("#pageSize").val() },
+      //               success: function (data) {
+
+      //                   let html = "";
+
+      //                    data.forEach(function (item) {
+      //       html += `
+      //           <div class="result-item" data-id="${item.project}">
+      //                 <strong style='font-size: 18px;'>${item.client}</strong><br/>
+      //                     <span>Project Name: <span style="color:#6f42c1;">${item.projectName}</span> </span>
+      //           </div>
+                        
+      //       `;
+      //   });
+         
+
+      //                   $("#projectResults").html(html);
+      //               },
+      //               error: function () {
+      //                   $("#projectResults").html("Error loading data");
+      //               },
+      //               complete: function () {
+      //                  // $("#loader").hide();   
+      //               }
+      //           });
+
+      //       }, 400);
+      // }  });
+
+
+
+
+              let currentPage = 1;
+        let totalPages = 1;
+
+        function searchProjects() {
+
+            let searchText = $("#projectSearch").val();
+            let searchType = $("#search-dropdown").val();
+            let activeProjectsOnly = $("#activeProjectsOnly").is(":checked");
+
+            $("#projectResults").html("Loading...");
+
+            $.ajax({
+                url: "/Home/SearchProjects",
+                type: "GET",
+
+                data: {
+                    query: searchText,
+                    type: searchType,
+                    filter: activeProjectsOnly,
+                    page: currentPage,
+                    pageSize: $("#pageSize").val()
+                },
+
+                success: function (response) {
+
+                    let html = "";
+
+                    response.data.forEach(function (item) {
+
+                        html += `
+                            <div class="result-item" data-id="${item.project}">
+
+                                <strong style="font-size:18px;">
+                                    ${item.client}
+                                </strong>
+
+                                <br/>
+
+                                <span>
+                                    Project Name:
+                                    <span style="color:#6f42c1;">
+                                        ${item.projectName}
+                                    </span>
+                                </span>
+
+                            </div>
+                        `;
+                    });
+
+                            $("#totalCountText").text(
+            `Total: ${response.totalCount}`
+        );
+
+                    $("#projectResults").html(html);
+
+                    totalPages = Math.ceil(
+                        response.totalCount / $("#pageSize").val()
+                    );
+
+                    $("#pageInfo").text(
+                        `Page ${currentPage} of ${totalPages}`
+                    );
+
+                    $("#prevBtn").prop(
+                        "disabled",
+                        currentPage === 1
+                    );
+
+                    $("#nextBtn").prop(
+                        "disabled",
+                        currentPage === totalPages
+                    );
+                },
+
+                error: function () {
+
+                    $("#projectResults").html(
+                        "Error loading data"
+                    );
+                }
+            });
+        }
+
+        $("#projectSearch").on("keypress", function (e) {
+
+            if (e.which === 13) {
+
+                e.preventDefault();
+
+                currentPage = 1;
+
+                searchProjects();
+            }
         });
 
-                        $("#projectResults").html(html);
-                    },
-                    error: function () {
-                        $("#projectResults").html("Error loading data");
-                    },
-                    complete: function () {
-                       // $("#loader").hide();   
-                    }
-                });
+        $("#nextBtn").click(function () {
 
-            }, 400);
-      }  });
+            if (currentPage < totalPages) {
+
+                currentPage++;
+
+                searchProjects();
+            }
+        });
+
+        $("#prevBtn").click(function () {
+
+            if (currentPage > 1) {
+
+                currentPage--;
+
+                searchProjects();
+            }
+        });
+
+        $("#pageSize").change(function () {
+
+            currentPage = 1;
+
+            searchProjects();
+        });
+
+
 
         });
 
@@ -446,6 +604,26 @@
     </script>
 
     <style>
+
+        .pagination-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+            .pagination-container button {
+                border: 1px solid #ccc;
+                background: white;
+                padding: 6px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+
+                .pagination-container button:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
 
 .active-filter {
     display: flex;

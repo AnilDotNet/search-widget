@@ -77,41 +77,7 @@ namespace Search_Widget.Controllers
             ViewData["UserName"] = userNameClaim;
             ViewData["userEmailID"] = userEmailID;
 
-        //    var projects = new List<SearchWidgetModel>()
-        //{
-        //    new SearchWidgetModel{
-        //        ClientName="Acme Corporation",
-        //        ProjectNumber="123456",
-        //        ProjectName="Downtown Office Complex Renovation",
-        //        Status="Active",
-        //        ProjectManager="John Smith",
-        //        PracticeLeader="Sarah Johnson"
-        //    },
-        //    new SearchWidgetModel{
-        //        ClientName="Bcme Corporation 2",
-        //        ProjectNumber="223456",
-        //        ProjectName="Newtown Office Complex Renovation",
-        //        Status="Active",
-        //        ProjectManager="Robert Brown",
-        //        PracticeLeader="Lisa White"
-        //    },
-        //    new SearchWidgetModel{
-        //        ClientName="Ccme Corporation 3",
-        //        ProjectNumber="323456",
-        //        ProjectName="DLF Office Complex Renovation",
-        //        Status="Inactive",
-        //        ProjectManager="David Lee",
-        //        PracticeLeader="Chris Green"
-        //    },
-        //     new SearchWidgetModel{
-        //        ClientName="Success",
-        //        ProjectNumber="323456",
-        //        ProjectName="DLF Office Complex Renovation",
-        //        Status="Inactive",
-        //        ProjectManager="David Lee",
-        //        PracticeLeader="Chris Green"
-        //    }
-        //};
+        
             return View();
         }
 
@@ -120,78 +86,259 @@ namespace Search_Widget.Controllers
             return View();
         }
 
+        //[HttpGet]
+        //public IActionResult SearchProjects(string query, string type, bool filter, int page = 1, int pageSize = 20)
+        //{
+        //    var results = new List<object>();
+
+        //    string connectionString = _configuration.GetConnectionString("DefaultConnection");
+        //    string sql;
+        //    string countSql;
+        //    int totalCount = 0;
+        //    if (filter) { sql = "SELECT Project, [Project Name], Client FROM dbo.vw_SearchWidgetCheckIn WHERE [Project Status] = 'A' AND"; countSql = "SELECT COUNT(*) FROM dbo.vw_SearchWidgetCheckIn WHERE [Project Status] = 'A' AND "; }
+        //    else { sql = "SELECT Project, [Project Name], Client FROM dbo.vw_SearchWidgetCheckIn WHERE "; countSql = "SELECT COUNT(*) FROM dbo.vw_SearchWidgetCheckIn WHERE "; }
+
+        //   // string sql = "SELECT TOP 20 Project, [Project Name], Client FROM dbo.vw_SearchWidgetCheckIn WHERE ";            
+
+        //    switch (type)
+        //    {
+        //        case "Project No":
+        //            sql += "Project LIKE @query";
+        //            break;
+
+        //        case "Project Name":
+        //            sql += "[Project Name] LIKE @query + '%'";
+        //            break;
+
+        //        case "Project Mgr":
+        //            sql += "[Project Manager] LIKE @query + '%'";
+        //            break;
+
+        //        case "Client Name":
+        //            sql += "Client LIKE @query + '%'";
+        //            break;
+
+        //        default:
+        //            sql += "(Project LIKE @query OR [Project Name] LIKE @query OR Client LIKE @query OR [Project Manager] LIKE @query)";
+        //            break;
+        //    }
+        //    // sql += " OPTION (RECOMPILE)";
+
+
+        //    sql += @"
+        //ORDER BY Project
+        //OFFSET @Offset ROWS
+        //FETCH NEXT @PageSize ROWS ONLY
+        //OPTION (RECOMPILE)";
+
+        //    int offset = (page - 1) * pageSize;
+
+        //    using (SqlConnection conn = new SqlConnection(connectionString))
+        //    using (SqlCommand cmd = new SqlCommand(sql, conn))
+        //    {
+        //        cmd.CommandTimeout = 60; // seconds
+        //        // cmd.Parameters.Add("@query", SqlDbType.VarChar).Value = "%" + query + "%";
+        //        // cmd.Parameters.Add("@query", SqlDbType.NVarChar).Value =  query ;
+
+        //        cmd.Parameters.Add("@query", SqlDbType.VarChar).Value = query + "%";
+        //        cmd.Parameters.AddWithValue("@Offset", offset);
+        //        cmd.Parameters.AddWithValue("@PageSize", pageSize);
+
+        //        conn.Open();
+        //        try
+        //        {
+        //            using (var reader = cmd.ExecuteReader())
+        //            {
+        //                while (reader.Read())
+        //                {
+        //                    results.Add(new
+        //                    {
+        //                        client = reader["Client"]?.ToString(),
+        //                        project = reader["Project"]?.ToString(),
+        //                        projectName = reader["Project Name"]?.ToString()
+        //                    });
+        //                }
+        //            }
+        //        }
+        //        catch (SqlException ex)
+        //        {
+        //            // log error
+        //            return StatusCode(500, "Database timeout. Try again.");
+        //        }
+        //    }
+
+        //    //return Json(results);
+
+        //    return Json(new
+        //    {
+        //        data = results,
+        //        totalCount = totalCount
+        //    });
+        //}
+
+
         [HttpGet]
-        public IActionResult SearchProjects(string query, string type, bool filter)
+        public IActionResult SearchProjects(
+    string query,
+    string type,
+    bool filter,
+    int page = 1,
+    int pageSize = 10)
         {
             var results = new List<object>();
 
-            string connectionString = _configuration.GetConnectionString("DefaultConnection");
-            string sql;
-            if (filter) { sql = "SELECT TOP 20 Project, [Project Name], Client FROM dbo.vw_SearchWidgetCheckIn WHERE [Project Status] = 'A' AND"; }
-            else { sql = "SELECT TOP 20 Project, [Project Name], Client FROM dbo.vw_SearchWidgetCheckIn WHERE "; }
+            string connectionString =
+                _configuration.GetConnectionString("DefaultConnection");
 
-           // string sql = "SELECT TOP 20 Project, [Project Name], Client FROM dbo.vw_SearchWidgetCheckIn WHERE ";            
+            string sql;
+            string countSql;
+
+            int totalCount = 0;
+
+            if (filter)
+            {
+                sql = @"SELECT Project, [Project Name], Client
+                FROM dbo.vw_SearchWidgetCheckIn
+                WHERE [Project Status] = 'A' AND ";
+
+                countSql = @"SELECT COUNT(*)
+                     FROM dbo.vw_SearchWidgetCheckIn
+                     WHERE [Project Status] = 'A' AND ";
+            }
+            else
+            {
+                sql = @"SELECT Project, [Project Name], Client
+                FROM dbo.vw_SearchWidgetCheckIn
+                WHERE ";
+
+                countSql = @"SELECT COUNT(*)
+                     FROM dbo.vw_SearchWidgetCheckIn
+                     WHERE ";
+            }
 
             switch (type)
             {
                 case "Project No":
+
                     sql += "Project LIKE @query";
+                    countSql += "Project LIKE @query";
+
                     break;
 
                 case "Project Name":
+
                     sql += "[Project Name] LIKE @query + '%'";
+                    countSql += "[Project Name] LIKE @query + '%'";
+
                     break;
 
                 case "Project Mgr":
+
                     sql += "[Project Manager] LIKE @query + '%'";
+                    countSql += "[Project Manager] LIKE @query + '%'";
+
                     break;
 
                 case "Client Name":
+
                     sql += "Client LIKE @query + '%'";
+                    countSql += "Client LIKE @query + '%'";
+
                     break;
 
                 default:
-                    sql += "(Project LIKE @query OR [Project Name] LIKE @query OR Client LIKE @query OR [Project Manager] LIKE @query)";
+
+                    sql += @"(
+                        Project LIKE @query
+                        OR [Project Name] LIKE @query
+                        OR Client LIKE @query
+                        OR [Project Manager] LIKE @query
+                     )";
+
+                    countSql += @"(
+                            Project LIKE @query
+                            OR [Project Name] LIKE @query
+                            OR Client LIKE @query
+                            OR [Project Manager] LIKE @query
+                          )";
+
                     break;
             }
-            sql += " OPTION (RECOMPILE)";
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            sql += @"
+        ORDER BY Project
+        OFFSET @Offset ROWS
+        FETCH NEXT @PageSize ROWS ONLY
+        OPTION (RECOMPILE)";
 
-            //using (SqlCommand cmd = new SqlCommand("SELECT TOP 20 Project,[Project Name],Client FROM dbo.vw_SearchWidgetCheckIn WHERE [Project Name] LIKE @query",conn))
-            //{
-            //    cmd.Parameters.Add("@query", SqlDbType.VarChar).Value =  query + "%";
-            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            int offset = (page - 1) * pageSize;
+
+            using (SqlConnection conn =
+                new SqlConnection(connectionString))
             {
-                cmd.CommandTimeout = 60; // seconds
-                // cmd.Parameters.Add("@query", SqlDbType.VarChar).Value = "%" + query + "%";
-                 cmd.Parameters.Add("@query", SqlDbType.VarChar).Value =  query + "%";
-                // cmd.Parameters.Add("@query", SqlDbType.NVarChar).Value =  query ;
-
                 conn.Open();
-                try
+
+                // TOTAL COUNT
+                using (SqlCommand countCmd =
+                    new SqlCommand(countSql, conn))
                 {
+                    countCmd.CommandTimeout = 60;
+
+                    countCmd.Parameters.Add(
+                        "@query",
+                        SqlDbType.VarChar
+                    ).Value = query + "%";
+
+                    totalCount =
+                        Convert.ToInt32(countCmd.ExecuteScalar());
+                }
+
+                // PAGINATED DATA
+                using (SqlCommand cmd =
+                    new SqlCommand(sql, conn))
+                {
+                    cmd.CommandTimeout = 60;
+
+                    cmd.Parameters.Add(
+                        "@query",
+                        SqlDbType.VarChar
+                    ).Value = query + "%";
+
+                    cmd.Parameters.Add(
+                        "@Offset",
+                        SqlDbType.Int
+                    ).Value = offset;
+
+                    cmd.Parameters.Add(
+                        "@PageSize",
+                        SqlDbType.Int
+                    ).Value = pageSize;
+
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             results.Add(new
                             {
-                                client = reader["Client"]?.ToString(),
-                                project = reader["Project"]?.ToString(),
-                                projectName = reader["Project Name"]?.ToString()
+                                client =
+                                    reader["Client"]?.ToString(),
+
+                                project =
+                                    reader["Project"]?.ToString(),
+
+                                projectName =
+                                    reader["Project Name"]?.ToString()
                             });
                         }
                     }
                 }
-                catch (SqlException ex)
-                {
-                    // log error
-                    return StatusCode(500, "Database timeout. Try again.");
-                }
             }
 
-            return Json(results);
+            return Json(new
+            {
+                data = results,
+                totalCount = totalCount
+            });
         }
 
         [HttpGet]
