@@ -8,29 +8,38 @@ using Microsoft.Identity.Web;
 
 var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
 
-builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-  .AddMicrosoftIdentityWebApp(builder.Configuration);
+//commented on 13/06/2026 as part of testing without authentication
+//builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+//.AddMicrosoftIdentityWebApp(builder.Configuration);
 
+//commented on 13/06/2026 as part of testing without authentication
 // Add services to the container.
-builder.Services
-    .AddControllersWithViews(options =>
-    {
-        var policy = new AuthorizationPolicyBuilder()
-            .RequireAuthenticatedUser()
-            .Build();
-        options.Filters.Add(new AuthorizeFilter(policy));
-    })
-    .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
+//builder.Services
+//    .AddControllersWithViews(options =>
+//    {
+//        var policy = new AuthorizationPolicyBuilder()
+//            .RequireAuthenticatedUser()
+//            .Build();
+//        options.Filters.Add(new AuthorizeFilter(policy));
+//    })
+//    .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
 
-builder.Services.AddRazorPages()
-    .AddMvcOptions(options =>
-    {
-        var policy = new AuthorizationPolicyBuilder()
-                         .RequireAuthenticatedUser()
-                         .Build();
-        options.Filters.Add(new AuthorizeFilter(policy));
-    })
-    .AddMicrosoftIdentityUI();
+//commented on 13/06/2026 as part of testing without authentication
+//builder.Services.AddRazorPages()
+//    .AddMvcOptions(options =>
+//    {
+//        var policy = new AuthorizationPolicyBuilder()
+//                         .RequireAuthenticatedUser()
+//                         .Build();
+//        options.Filters.Add(new AuthorizeFilter(policy));
+//    })
+//    .AddMicrosoftIdentityUI();
+
+//Added on 13/06/2026 as part of testing without authentication
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+
+
 
 var app = builder.Build();
 
@@ -43,7 +52,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();
+//commented on 13/06/2026 as part of testing without authentication
+//app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();
 
