@@ -17,164 +17,80 @@ namespace Search_Widget.Controllers
         {
             _configuration = configuration;
         }
+
         public IActionResult Index()
         {
-
-            string connectionString = _configuration.GetConnectionString("DefaultConnection");
-
-            using (var conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-                Console.WriteLine("Connection Successful!");
-            }
-
-
-            var data = new List<Dictionary<string, object>>();
-            //string connectionString = _configuration.GetConnectionString("DefaultConnection");
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            using (SqlCommand cmd = new SqlCommand("SELECT TOP 100 * FROM vw_SearchWidgetCheckIn", conn))
-            {
-                try
-                {
-                    //cmd.Parameters.AddWithValue("@OfficeID", OfficeID);
-                    conn.Open();
-                    var reader = cmd.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        //var row = Enumerable.Range(0, reader.FieldCount)
-                        //    .ToDictionary(reader.GetName, reader.GetValue);
-                        //data.Add(row);
-                        var row = new Dictionary<string, object>();
-
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            var value = reader.IsDBNull(i) ? null : reader.GetValue(i);
-                            row.Add(reader.GetName(i), value);
-                        }
-                        data.Add(row);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("REAL ERROR: " + ex.ToString());
-                    throw;
-                }
-            }
-            
-
-
-            //var firstName = User.FindFirst("given_name")?.Value;
-            //ViewBag.FirstName = firstName; // Store the first name in ViewBag or use it as needed
-            //var isAdmin = User.IsInRole("Admin");
-            var userClaims = User.Claims.ToList();
-            //// If you are specifically looking for the user's name claim
-            var userNameClaim = userClaims.FirstOrDefault(c => c.Type == "name")?.Value;
-            var userEmailID = userClaims.FirstOrDefault(c => c.Type == "preferred_username")?.Value;
-            //// Alternatively, you can display all claims if you're unsure about the claim types
-            //ViewData["UserClaims"] = userClaims;
-            //// Pass userNameClaim to view
-            ViewData["UserName"] = userNameClaim;
-            ViewData["userEmailID"] = userEmailID;
-
-        
             return View();
         }
+
+        //public IActionResult Index()
+        //{
+
+        //    string connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+        //    using (var conn = new SqlConnection(connectionString))
+        //    {
+        //        conn.Open();
+        //        Console.WriteLine("Connection Successful!");
+        //    }
+
+
+        //    var data = new List<Dictionary<string, object>>();
+        //    //string connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+        //    using (SqlConnection conn = new SqlConnection(connectionString))
+        //    using (SqlCommand cmd = new SqlCommand("SELECT TOP 100 * FROM vw_SearchWidgetCheckIn", conn))
+        //    {
+        //        try
+        //        {
+        //            //cmd.Parameters.AddWithValue("@OfficeID", OfficeID);
+        //            conn.Open();
+        //            var reader = cmd.ExecuteReader();
+        //            while (reader.Read())
+        //            {
+        //                //var row = Enumerable.Range(0, reader.FieldCount)
+        //                //    .ToDictionary(reader.GetName, reader.GetValue);
+        //                //data.Add(row);
+        //                var row = new Dictionary<string, object>();
+
+        //                for (int i = 0; i < reader.FieldCount; i++)
+        //                {
+        //                    var value = reader.IsDBNull(i) ? null : reader.GetValue(i);
+        //                    row.Add(reader.GetName(i), value);
+        //                }
+        //                data.Add(row);
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Console.WriteLine("REAL ERROR: " + ex.ToString());
+        //            throw;
+        //        }
+        //    }
+
+
+
+        //    //var firstName = User.FindFirst("given_name")?.Value;
+        //    //ViewBag.FirstName = firstName; // Store the first name in ViewBag or use it as needed
+        //    //var isAdmin = User.IsInRole("Admin");
+        //    var userClaims = User.Claims.ToList();
+        //    //// If you are specifically looking for the user's name claim
+        //    var userNameClaim = userClaims.FirstOrDefault(c => c.Type == "name")?.Value;
+        //    var userEmailID = userClaims.FirstOrDefault(c => c.Type == "preferred_username")?.Value;
+        //    //// Alternatively, you can display all claims if you're unsure about the claim types
+        //    //ViewData["UserClaims"] = userClaims;
+        //    //// Pass userNameClaim to view
+        //    ViewData["UserName"] = userNameClaim;
+        //    ViewData["userEmailID"] = userEmailID;
+
+
+        //    return View();
+        //}
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error() {
             return View();
         }
-
-        //[HttpGet]
-        //public IActionResult SearchProjects(string query, string type, bool filter, int page = 1, int pageSize = 20)
-        //{
-        //    var results = new List<object>();
-
-        //    string connectionString = _configuration.GetConnectionString("DefaultConnection");
-        //    string sql;
-        //    string countSql;
-        //    int totalCount = 0;
-        //    if (filter) { sql = "SELECT Project, [Project Name], Client FROM dbo.vw_SearchWidgetCheckIn WHERE [Project Status] = 'A' AND"; countSql = "SELECT COUNT(*) FROM dbo.vw_SearchWidgetCheckIn WHERE [Project Status] = 'A' AND "; }
-        //    else { sql = "SELECT Project, [Project Name], Client FROM dbo.vw_SearchWidgetCheckIn WHERE "; countSql = "SELECT COUNT(*) FROM dbo.vw_SearchWidgetCheckIn WHERE "; }
-
-        //   // string sql = "SELECT TOP 20 Project, [Project Name], Client FROM dbo.vw_SearchWidgetCheckIn WHERE ";            
-
-        //    switch (type)
-        //    {
-        //        case "Project No":
-        //            sql += "Project LIKE @query";
-        //            break;
-
-        //        case "Project Name":
-        //            sql += "[Project Name] LIKE @query + '%'";
-        //            break;
-
-        //        case "Project Mgr":
-        //            sql += "[Project Manager] LIKE @query + '%'";
-        //            break;
-
-        //        case "Client Name":
-        //            sql += "Client LIKE @query + '%'";
-        //            break;
-
-        //        default:
-        //            sql += "(Project LIKE @query OR [Project Name] LIKE @query OR Client LIKE @query OR [Project Manager] LIKE @query)";
-        //            break;
-        //    }
-        //    // sql += " OPTION (RECOMPILE)";
-
-
-        //    sql += @"
-        //ORDER BY Project
-        //OFFSET @Offset ROWS
-        //FETCH NEXT @PageSize ROWS ONLY
-        //OPTION (RECOMPILE)";
-
-        //    int offset = (page - 1) * pageSize;
-
-        //    using (SqlConnection conn = new SqlConnection(connectionString))
-        //    using (SqlCommand cmd = new SqlCommand(sql, conn))
-        //    {
-        //        cmd.CommandTimeout = 60; // seconds
-        //        // cmd.Parameters.Add("@query", SqlDbType.VarChar).Value = "%" + query + "%";
-        //        // cmd.Parameters.Add("@query", SqlDbType.NVarChar).Value =  query ;
-
-        //        cmd.Parameters.Add("@query", SqlDbType.VarChar).Value = query + "%";
-        //        cmd.Parameters.AddWithValue("@Offset", offset);
-        //        cmd.Parameters.AddWithValue("@PageSize", pageSize);
-
-        //        conn.Open();
-        //        try
-        //        {
-        //            using (var reader = cmd.ExecuteReader())
-        //            {
-        //                while (reader.Read())
-        //                {
-        //                    results.Add(new
-        //                    {
-        //                        client = reader["Client"]?.ToString(),
-        //                        project = reader["Project"]?.ToString(),
-        //                        projectName = reader["Project Name"]?.ToString()
-        //                    });
-        //                }
-        //            }
-        //        }
-        //        catch (SqlException ex)
-        //        {
-        //            // log error
-        //            return StatusCode(500, "Database timeout. Try again.");
-        //        }
-        //    }
-
-        //    //return Json(results);
-
-        //    return Json(new
-        //    {
-        //        data = results,
-        //        totalCount = totalCount
-        //    });
-        //}
 
 
         [HttpGet]
