@@ -18,74 +18,74 @@ namespace Search_Widget.Controllers
             _configuration = configuration;
         }
 
-        //public IActionResult Index()
-        //{
-        //    return View();
-        //}
-
         public IActionResult Index()
         {
-
-            string connectionString = _configuration.GetConnectionString("DefaultConnection");
-
-            using (var conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-                Console.WriteLine("Connection Successful!");
-            }
-
-
-            var data = new List<Dictionary<string, object>>();
-            //string connectionString = _configuration.GetConnectionString("DefaultConnection");
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            using (SqlCommand cmd = new SqlCommand("SELECT TOP 100 * FROM vw_SearchWidgetCheckIn", conn))
-            {
-                try
-                {
-                    //cmd.Parameters.AddWithValue("@OfficeID", OfficeID);
-                    conn.Open();
-                    var reader = cmd.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        //var row = Enumerable.Range(0, reader.FieldCount)
-                        //    .ToDictionary(reader.GetName, reader.GetValue);
-                        //data.Add(row);
-                        var row = new Dictionary<string, object>();
-
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            var value = reader.IsDBNull(i) ? null : reader.GetValue(i);
-                            row.Add(reader.GetName(i), value);
-                        }
-                        data.Add(row);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("REAL ERROR: " + ex.ToString());
-                    throw;
-                }
-            }
-
-
-
-            //var firstName = User.FindFirst("given_name")?.Value;
-            //ViewBag.FirstName = firstName; // Store the first name in ViewBag or use it as needed
-            //var isAdmin = User.IsInRole("Admin");
-            var userClaims = User.Claims.ToList();
-            //// If you are specifically looking for the user's name claim
-            var userNameClaim = userClaims.FirstOrDefault(c => c.Type == "name")?.Value;
-            var userEmailID = userClaims.FirstOrDefault(c => c.Type == "preferred_username")?.Value;
-            //// Alternatively, you can display all claims if you're unsure about the claim types
-            //ViewData["UserClaims"] = userClaims;
-            //// Pass userNameClaim to view
-            ViewData["UserName"] = userNameClaim;
-            ViewData["userEmailID"] = userEmailID;
-
-
             return View();
         }
+
+        //public IActionResult Index()
+        //{
+
+        //    string connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+        //    using (var conn = new SqlConnection(connectionString))
+        //    {
+        //        conn.Open();
+        //        Console.WriteLine("Connection Successful!");
+        //    }
+
+
+        //    var data = new List<Dictionary<string, object>>();
+        //    //string connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+        //    using (SqlConnection conn = new SqlConnection(connectionString))
+        //    using (SqlCommand cmd = new SqlCommand("SELECT TOP 100 * FROM vw_SearchWidgetCheckIn", conn))
+        //    {
+        //        try
+        //        {
+        //            //cmd.Parameters.AddWithValue("@OfficeID", OfficeID);
+        //            conn.Open();
+        //            var reader = cmd.ExecuteReader();
+        //            while (reader.Read())
+        //            {
+        //                //var row = Enumerable.Range(0, reader.FieldCount)
+        //                //    .ToDictionary(reader.GetName, reader.GetValue);
+        //                //data.Add(row);
+        //                var row = new Dictionary<string, object>();
+
+        //                for (int i = 0; i < reader.FieldCount; i++)
+        //                {
+        //                    var value = reader.IsDBNull(i) ? null : reader.GetValue(i);
+        //                    row.Add(reader.GetName(i), value);
+        //                }
+        //                data.Add(row);
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Console.WriteLine("REAL ERROR: " + ex.ToString());
+        //            throw;
+        //        }
+        //    }
+
+
+
+        //    //var firstName = User.FindFirst("given_name")?.Value;
+        //    //ViewBag.FirstName = firstName; // Store the first name in ViewBag or use it as needed
+        //    //var isAdmin = User.IsInRole("Admin");
+        //    var userClaims = User.Claims.ToList();
+        //    //// If you are specifically looking for the user's name claim
+        //    var userNameClaim = userClaims.FirstOrDefault(c => c.Type == "name")?.Value;
+        //    var userEmailID = userClaims.FirstOrDefault(c => c.Type == "preferred_username")?.Value;
+        //    //// Alternatively, you can display all claims if you're unsure about the claim types
+        //    //ViewData["UserClaims"] = userClaims;
+        //    //// Pass userNameClaim to view
+        //    ViewData["UserName"] = userNameClaim;
+        //    ViewData["userEmailID"] = userEmailID;
+
+
+        //    return View();
+        //}
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error() {
