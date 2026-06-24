@@ -144,22 +144,22 @@ namespace Search_Widget.Controllers
 
                 case "Project Name":
 
-                    sql += "[Project Name] LIKE @query + '%'";
-                    countSql += "[Project Name] LIKE @query + '%'";
+                    sql += "[Project Name] LIKE '%' + @query + '%'";
+                    countSql += "[Project Name] LIKE '%' + @query + '%'";
 
                     break;
 
                 case "Project Mgr":
 
-                    sql += "[Project Manager] LIKE @query + '%'";
-                    countSql += "[Project Manager] LIKE @query + '%'";
+                    sql += "[Project Manager] LIKE '%' + @query + '%'";
+                    countSql += "[Project Manager] LIKE '%' + @query + '%'";
 
                     break;
 
                 case "Client Name":
 
-                    sql += "Client LIKE @query + '%'";
-                    countSql += "Client LIKE @query + '%'";
+                    sql += "Client LIKE '%' + @query + '%'";
+                    countSql += "Client LIKE '%' + @query + '%'";
 
                     break;
 
@@ -167,16 +167,16 @@ namespace Search_Widget.Controllers
 
                     sql += @"(
                         Project LIKE '%' + @query + '%'
-                        OR [Project Name] LIKE @query
-                        OR Client LIKE @query
-                        OR [Project Manager] LIKE @query
+                        OR [Project Name] LIKE '%' + @query + '%'
+                        OR Client LIKE '%' + @query + '%'
+                        OR [Project Manager] LIKE '%' + @query + '%'
                      )";
 
                     countSql += @"(
                             Project LIKE '%' + @query + '%'
-                            OR [Project Name] LIKE @query
-                            OR Client LIKE @query
-                            OR [Project Manager] LIKE @query
+                            OR [Project Name] LIKE '%' + @query + '%'
+                            OR Client LIKE '%' + @query + '%'
+                            OR [Project Manager] LIKE '%' + @query + '%'
                           )";
 
                     break;

@@ -213,6 +213,7 @@
                 type: "GET",
                 data: { id: projectId },
                 success: function (data) {
+                       console.log(data);
 
                     let html = `
                         <h3><strong>${data.clientName}</strong></h3>
@@ -316,22 +317,22 @@
         </div>
 
                         <hr/>
-                        <b>Quick Links:</b><br/>                           
+                        <b>Quick Links:</b><br/>                                            
 
-                                  
+             ${data.projectWise_URL ? `
+                  <div class="link-item">
+              <span class="icon-box"><i class="bi bi-folder"></i></span>
+                    <a href="${data.projectWise_URL}" target="_blank">ProjectWise</a>
+          </div>
+          ` : ''}
 
-                <div class="link-item">
-            <span class="icon-box"><i class="bi bi-folder"></i></span>
-                <a href="${data.ProjectWise_URL}" target="_blank">ProjectWise</a>
-        </div>
-
-                ${data.Salesforce_URL ? `
+                  ${data.salesforce_URL ? `
             <div class="link-item">
                 <span class="icon-box">
                     <i class="bi bi-currency-dollar"></i>
                 </span>
 
-                <a href="${data.Salesforce_URL}" target="_blank">
+                  <a href="${data.salesforce_URL}" target="_blank">
                     Salesforce
                 </a>
             </div>
@@ -339,7 +340,7 @@
 
         <div class="link-item">
             <span class="icon-box"><i class="bi bi-info"></i></span>
-                <a href="${data.Vision_URL}" target="_blank">Vision</a>
+                  <a href="${data.vision_URL}" target="_blank">Vision</a>
         </div>
                     `;
 
