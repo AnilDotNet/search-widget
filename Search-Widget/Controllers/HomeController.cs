@@ -136,9 +136,10 @@ namespace Search_Widget.Controllers
             {
                 case "Project No":
 
-                    sql += "Project LIKE @query";
-                    countSql += "Project LIKE @query";
-
+                    //sql += "Project LIKE @query";                    
+                    //countSql += "Project LIKE @query";
+                    sql += "[Project] LIKE '%' + @query + '%'";
+                    countSql += "[Project] LIKE '%' +  @query + '%'";
                     break;
 
                 case "Project Name":
@@ -165,14 +166,14 @@ namespace Search_Widget.Controllers
                 default:
 
                     sql += @"(
-                        Project LIKE @query
+                        Project LIKE '%' + @query + '%'
                         OR [Project Name] LIKE @query
                         OR Client LIKE @query
                         OR [Project Manager] LIKE @query
                      )";
 
                     countSql += @"(
-                            Project LIKE @query
+                            Project LIKE '%' + @query + '%'
                             OR [Project Name] LIKE @query
                             OR Client LIKE @query
                             OR [Project Manager] LIKE @query
