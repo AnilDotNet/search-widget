@@ -157,8 +157,11 @@
 
         $(".clear-btn").click(function () {
             $("#projectSearch").val("");
-            $("#projectResults").html("");   // clear results list
-        });
+              $("#projectResults").html("");   // clear results list
+                    $("#projectDetails").html("");   // clear results list
+                          $("#pageInfo").html("");   // clear results list
+                            $("#totalCountText").html("");   // clear results list
+          });
 
         function getInitials(name) {
             return name.split(' ')

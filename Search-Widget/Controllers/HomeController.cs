@@ -183,7 +183,7 @@ namespace Search_Widget.Controllers
             }
 
             sql += @"
-        ORDER BY Project
+        ORDER BY Project DESC
         OFFSET @Offset ROWS
         FETCH NEXT @PageSize ROWS ONLY
         OPTION (RECOMPILE)";
