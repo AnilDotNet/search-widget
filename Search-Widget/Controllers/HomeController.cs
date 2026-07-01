@@ -5,7 +5,9 @@ using Search_Widget.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Search_Widget.Controllers
@@ -20,6 +22,22 @@ namespace Search_Widget.Controllers
 
         public IActionResult Index()
         {
+            var firstName = User.FindFirst("given_name")?.Value;
+            ViewBag.FirstName = firstName; // Store the first name in ViewBag or use it as needed
+            var isAdmin = User.IsInRole("Admin");
+            var userClaims = User.Claims.ToList();
+            // If you are specifically looking for the user's name claim
+            var userNameClaim = userClaims.FirstOrDefault(c => c.Type == "name")?.Value;
+            // Alternatively, you can display all claims if you're unsure about the claim types
+            ViewData["UserClaims"] = userClaims;
+            // Pass userNameClaim to view
+            ViewData["UserName"] = userNameClaim;
+            // Alternatively, get the user's roles directly from Claims
+            var userRoles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+            ViewData["UserRoles"] = userRoles;
+            //HttpContext.Session.SetString("UserName", ViewData["UserName"]?.ToString());
+            //string userName = HttpContext.Session.GetString("UserName");
+            //Debug.WriteLine("Session UserName Home: " + userName);
             return View();
         }
 
@@ -293,9 +311,9 @@ namespace Search_Widget.Controllers
                             officePracticeLead = reader["Office Practice Lead"]?.ToString(),
                             officePracticeLeadEmail = reader["Office Practice Lead Email"]?.ToString(),
                             officePracticeLeadStatus = reader["Office Practice Lead Status"]?.ToString(),
-                            Vision_URL = reader["Vision_URL"]?.ToString(),
-                            ProjectWise_URL = reader["ProjectWise_URL"]?.ToString(),
-                            Salesforce_URL = reader["Salesforce_URL"]?.ToString()
+                            VisionUrl= reader["Vision_URL"]?.ToString(),
+                            ProjectWiseUrl = reader["ProjectWise_URL"]?.ToString(),
+                            SalesforceUrl = reader["Salesforce_URL"]?.ToString()
                             //practiceLeader = reader["PracticeLeader"]?.ToString(),
                             //org = reader["CustTRCOrg"]?.ToString()
                         };

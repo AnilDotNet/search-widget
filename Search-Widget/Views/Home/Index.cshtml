@@ -320,22 +320,22 @@
         </div>
 
                         <hr/>
-                        <b>Quick Links:</b><br/>                                            
+                        <b>Quick Links:</b><br/>
 
-             ${data.projectWise_URL ? `
+               ${data.ProjectWiseUrl ? `
                   <div class="link-item">
               <span class="icon-box"><i class="bi bi-folder"></i></span>
-                    <a href="${data.projectWise_URL}" target="_blank">ProjectWise</a>
+                      <a href="${data.ProjectWiseUrl}" target="_blank">ProjectWise</a>
           </div>
           ` : ''}
 
-                  ${data.salesforce_URL ? `
+                    ${data.SalesforceUrl ? `
             <div class="link-item">
                 <span class="icon-box">
                     <i class="bi bi-currency-dollar"></i>
                 </span>
 
-                  <a href="${data.salesforce_URL}" target="_blank">
+                    <a href="${data.SalesforceUrl}" target="_blank">
                     Salesforce
                 </a>
             </div>
@@ -343,7 +343,7 @@
 
         <div class="link-item">
             <span class="icon-box"><i class="bi bi-info"></i></span>
-                  <a href="${data.vision_URL}" target="_blank">Vision</a>
+                    <a href="${data.VisionUrl}" target="_blank">Vision</a>
         </div>
                     `;
 
